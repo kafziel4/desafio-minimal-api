@@ -1,4 +1,17 @@
+using Microsoft.EntityFrameworkCore;
+using MinimalApi.Dominio.DTOs;
+using MinimalApi.Infraestrutura.Db;
+
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Services.AddDbContext<DbContexto>(options =>
+{
+    var stringConexao = builder.Configuration.GetConnectionString("mysql");
+        
+    options.UseMySql(
+        stringConexao, ServerVersion.AutoDetect(stringConexao));
+});
+
 var app = builder.Build();
 
 app.MapGet("/", () => "Hello World!");
@@ -9,9 +22,3 @@ app.MapPost("/login", (LoginDto loginDto) =>
         : Results.Unauthorized());
 
 app.Run();
-
-public class LoginDto
-{
-    public required string Email { get; set; }
-    public required string Senha { get; set; }
-}
