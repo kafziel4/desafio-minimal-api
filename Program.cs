@@ -29,14 +29,16 @@ app.UseSwagger();
 app.UseSwaggerUI();
 
 #region Home
-app.MapGet("/", () => Results.Json(new Home()));
+app.MapGet("/", () => Results.Json(new Home()))
+    .WithTags("Home");
 #endregion
 
 #region Administradores
 app.MapPost("/administradores/login", ([FromBody] LoginDto loginDto, IAdministradorServico administradorServico) => 
 administradorServico.Login(loginDto) is not null
     ? Results.Ok("Login com sucesso")
-    : Results.Unauthorized());
+    : Results.Unauthorized())
+.WithTags("Administradores");
 #endregion
 
 #region Veiculos
@@ -52,7 +54,7 @@ app.MapPost("/veiculos", ([FromBody] VeiculoDto veiculoDto, IVeiculoServico veic
     veiculoServico.Incluir(veiculo);
     
     return Results.Created($"/veiculos/{veiculo.Id}", veiculo);
-});
+}).WithTags("Veiculos");
 
 app.MapGet("/veiculos", ([FromQuery] int? pagina, IVeiculoServico veiculoServico) =>
 {
@@ -61,7 +63,7 @@ app.MapGet("/veiculos", ([FromQuery] int? pagina, IVeiculoServico veiculoServico
         : veiculoServico.Todos();
     
     return Results.Ok(veiculos);
-});
+}).WithTags("Veiculos");
 #endregion
 
 app.Run();
