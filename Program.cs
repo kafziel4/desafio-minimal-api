@@ -7,6 +7,9 @@ using MinimalApi.Infraestrutura.Db;
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen();
+
 builder.Services.AddScoped<IAdministradorServico, AdministradorServico>();
 
 builder.Services.AddDbContext<DbContexto>(options =>
@@ -18,6 +21,9 @@ builder.Services.AddDbContext<DbContexto>(options =>
 });
 
 var app = builder.Build();
+
+app.UseSwagger();
+app.UseSwaggerUI();
 
 app.MapGet("/", () => "Hello World!");
 
