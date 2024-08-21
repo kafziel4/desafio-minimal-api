@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using MinimalApi.Dominio.DTOs;
 using MinimalApi.Dominio.Entidades;
+using MinimalApi.Dominio.Enums;
 using MinimalApi.Dominio.Interfaces;
 using MinimalApi.Dominio.ModelViews;
 using MinimalApi.Dominio.Servicos;
@@ -34,11 +35,93 @@ app.MapGet("/", () => Results.Json(new Home()))
 #endregion
 
 #region Administradores
-app.MapPost("/administradores/login", ([FromBody] LoginDto loginDto, IAdministradorServico administradorServico) => 
-administradorServico.Login(loginDto) is not null
-    ? Results.Ok("Login com sucesso")
-    : Results.Unauthorized())
-.WithTags("Administradores");
+app.MapPost("/administradores/login", (
+    [FromBody] LoginDto loginDto,
+    IAdministradorServico administradorServico) =>
+    administradorServico.Login(loginDto) is not null
+        ? Results.Ok("Login com sucesso")
+        : Results.Unauthorized())
+    .WithTags("Administradores");
+
+app.MapPost("/administradores", (
+    [FromBody] AdministradorDto administradorDto,
+    IAdministradorServico administradorServico) =>
+{
+    var validacao = new ErrosDeValidacao
+    {
+        Mensagens = []
+    };
+
+    if (string.IsNullOrWhiteSpace(administradorDto.Email))
+    {
+        validacao.Mensagens.Add("Email não pode ficar em branco");
+    }
+    
+    if (string.IsNullOrWhiteSpace(administradorDto.Senha))
+    {
+        validacao.Mensagens.Add("Senha não pode ficar em branco");
+    }
+    
+    if (!Enum.IsDefined(typeof(Perfil), administradorDto.Perfil))
+    {
+        validacao.Mensagens.Add("Perfil inválido");
+    }
+
+    if (validacao.Mensagens.Count > 0)
+    {
+        return Results.BadRequest(validacao);
+    }
+
+    var administrador = new Administrador
+    {
+        Email = administradorDto.Email,
+        Senha = administradorDto.Senha,
+        Perfil = administradorDto.Perfil.ToString()
+    };
+    
+    administradorServico.Incluir(administrador);
+
+    return Results.Created($"/administradores/{administrador.Id}", new AdministradorModelView
+    {
+        Id = administrador.Id,
+        Email = administrador.Email,
+        Perfil = administrador.Perfil
+    });
+}).WithTags("Administradores");
+
+app.MapGet("/administradores", ([FromQuery] int? pagina, IAdministradorServico administradorServico) =>
+{
+    var administradores = pagina is > 0
+        ? administradorServico.Todos(pagina.Value)
+        : administradorServico.Todos();
+
+    var administradoresModelView = administradores
+        .Select(a => new AdministradorModelView
+        {
+            Id = a.Id,
+            Email = a.Email,
+            Perfil = a.Perfil
+        }).ToList();
+    
+    return Results.Ok(administradoresModelView);
+}).WithTags("Administradores");
+
+app.MapGet("/administradores/{id}", ([FromRoute] int id, IAdministradorServico administradorServico) =>
+{
+    var administrador = administradorServico.BuscaPorId(id);
+
+    if (administrador is null)
+    {
+        return Results.NotFound();
+    }
+    
+    return Results.Ok(new AdministradorModelView
+    {
+        Id = administrador.Id,
+        Email = administrador.Email,
+        Perfil = administrador.Perfil
+    });
+}).WithTags("Administradores");
 #endregion
 
 #region Veiculos
