@@ -330,3 +330,5 @@ app.MapDelete("/veiculos/{id}", ([FromRoute] int id, IVeiculoServico veiculoServ
 #endregion
 
 app.Run();
+
+public partial class Program;
