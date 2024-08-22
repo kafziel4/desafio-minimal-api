@@ -9,11 +9,11 @@ public class Administrador
     public int Id { get; set; }
     
     [StringLength(255)]
-    public required string Email { get; set; }
+    public string Email { get; set; } = string.Empty;
     
     [StringLength(50)]
-    public required string Senha { get; set; }
+    public string Senha { get; set; } = string.Empty;
     
     [StringLength(10)]
-    public required string Perfil { get; set; }
+    public string Perfil { get; set; } = string.Empty;
 }

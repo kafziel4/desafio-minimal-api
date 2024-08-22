@@ -8,10 +8,10 @@ public class Veiculo
     public int Id { get; set; }
 
     [StringLength(150)]
-    public required string Nome { get; set; }
+    public string Nome { get; set; } = string.Empty;
 
     [StringLength(100)]
-    public required string Marca { get; set; }
+    public string Marca { get; set; } = string.Empty;
 
     public int Ano { get; set; }
 }
