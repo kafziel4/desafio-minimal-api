@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RunSettings>
+	<RunConfiguration>
+		<EnvironmentVariables>
+			<CONNECTION_STRING>Server=localhost;Port=3306;Database=minimal_api_test;Uid=dev;Pwd=123456;</CONNECTION_STRING>
+		</EnvironmentVariables>
+	</RunConfiguration>
+</RunSettings>
