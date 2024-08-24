@@ -5,56 +5,55 @@ using MinimalApi.Infraestrutura.Db;
 
 namespace MinimalApi.Dominio.Servicos;
 
-public class VeiculoServico : IVeiculoServico
+public class VeiculoServico(DbContexto contexto) : IVeiculoServico
 {
-    private readonly DbContexto _contexto;
+    private const int ItensPorPagina = 10;
 
-    public VeiculoServico(DbContexto contexto)
+    public async Task<List<Veiculo>> Todos(int? pagina = 1, string? nome = null, string? marca = null)
     {
-        _contexto = contexto;
-    }
+        if (pagina is null or <= 0)
+        {
+            pagina = 1;
+        }
 
-    public List<Veiculo> Todos(int pagina = 1, string? nome = null, string? marca = null)
-    {
-        var query = _contexto.Veiculos.AsQueryable();
+        var query = contexto.Veiculos.AsQueryable();
 
         if (!string.IsNullOrEmpty(nome))
         {
             query = query.Where(v => EF.Functions.Like(v.Nome, $"%{nome}%"));
         }
-        
+
         if (!string.IsNullOrEmpty(marca))
         {
             query = query.Where(v => EF.Functions.Like(v.Marca, $"%{marca}%"));
         }
 
-        var itensPorPagina = 10;
-
-        query = query.Skip((pagina - 1) * itensPorPagina).Take(itensPorPagina);
-
-        return query.ToList();
+        return await query
+            .Skip((pagina.Value - 1) * ItensPorPagina)
+            .Take(ItensPorPagina)
+            .ToListAsync();
     }
 
-    public Veiculo? BuscaPorId(int id)
+    public async Task<Veiculo?> BuscaPorId(int id)
     {
-        return _contexto.Veiculos.Find(id);
+        return await contexto.Veiculos.FindAsync(id);
     }
 
-    public void Incluir(Veiculo veiculo)
+    public async Task Incluir(Veiculo veiculo)
     {
-        _contexto.Veiculos.Add(veiculo);
-        _contexto.SaveChanges();
+        contexto.Veiculos.Add(veiculo);
+        await contexto.SaveChangesAsync();
     }
 
-    public void Atualizar(Veiculo veiculo)
+    public async Task Atualizar(Veiculo veiculo)
     {
-        _contexto.Veiculos.Update(veiculo);
-        _contexto.SaveChanges();
+        contexto.Veiculos.Update(veiculo);
+        await contexto.SaveChangesAsync();
     }
 
-    public void Apagar(Veiculo veiculo)
+    public async Task Apagar(Veiculo veiculo)
     {
-        _contexto.Veiculos.Remove(veiculo);
-        _contexto.SaveChanges();
+        contexto.Veiculos.Remove(veiculo);
+        await contexto.SaveChangesAsync();
     }
 }

@@ -4,9 +4,9 @@ namespace MinimalApi.Dominio.Interfaces;
 
 public interface IVeiculoServico
 {
-    List<Veiculo> Todos(int pagina = 1, string? nome = null, string? marca = null);
-    Veiculo? BuscaPorId(int id);
-    void Incluir(Veiculo veiculo);
-    void Atualizar(Veiculo veiculo);
-    void Apagar(Veiculo veiculo);
+    Task<List<Veiculo>> Todos(int? pagina = 1, string? nome = null, string? marca = null);
+    Task<Veiculo?> BuscaPorId(int id);
+    Task Incluir(Veiculo veiculo);
+    Task Atualizar(Veiculo veiculo);
+    Task Apagar(Veiculo veiculo);
 }

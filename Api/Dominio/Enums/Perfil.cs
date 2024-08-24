@@ -2,6 +2,6 @@
 
 public enum Perfil
 {
-    Adm,
-    Editor
+    Adm = 1,
+    Editor = 2
 }

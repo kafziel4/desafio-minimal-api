@@ -15,34 +15,36 @@ public class VeiculoServicoMock : IVeiculoServico
             Ano = 2014
         }
     ];
-    
-    public List<Veiculo> Todos(int pagina = 1, string? nome = null, string? marca = null)
+
+    public Task<List<Veiculo>> Todos(int? pagina = 1, string? nome = null, string? marca = null)
     {
-        return _veiculos;
+        return Task.FromResult(_veiculos);
     }
 
-    public Veiculo? BuscaPorId(int id)
+    public Task<Veiculo?> BuscaPorId(int id)
     {
-        return _veiculos.Find(v => v.Id == id);
+        return Task.FromResult(_veiculos.Find(v => v.Id == id));
     }
 
-    public void Incluir(Veiculo veiculo)
+    public Task Incluir(Veiculo veiculo)
     {
         veiculo.Id = _veiculos.Count + 1;
         _veiculos.Add(veiculo);
+        return Task.CompletedTask;
     }
 
-    public void Atualizar(Veiculo veiculo)
+    public Task Atualizar(Veiculo veiculo)
     {
         _veiculos = _veiculos
             .Where(v => v.Id == veiculo.Id)
             .Select(_ => veiculo)
             .ToList();
+        return Task.CompletedTask;
     }
 
-    public void Apagar(Veiculo veiculo)
+    public Task Apagar(Veiculo veiculo)
     {
-        var veiculoLista = BuscaPorId(veiculo.Id);
-        _veiculos.Remove(veiculoLista!);
+        _veiculos.Remove(veiculo);
+        return Task.CompletedTask;
     }
 }

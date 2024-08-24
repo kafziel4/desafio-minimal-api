@@ -2,9 +2,4 @@
 
 namespace MinimalApi.Dominio.DTOs;
 
-public class AdministradorDto
-{
-    public required string Email { get; set; }
-    public required string Senha { get; set; }
-    public Perfil Perfil { get; set; }
-}
+public record AdministradorDto(string Email, string Senha, Perfil Perfil);

@@ -1,44 +1,47 @@
-﻿using MinimalApi.Dominio.DTOs;
+﻿using Microsoft.EntityFrameworkCore;
+using MinimalApi.Dominio.DTOs;
 using MinimalApi.Dominio.Entidades;
 using MinimalApi.Dominio.Interfaces;
 using MinimalApi.Infraestrutura.Db;
 
 namespace MinimalApi.Dominio.Servicos;
 
-public class AdministradorServico : IAdministradorServico
+public class AdministradorServico(DbContexto contexto) : IAdministradorServico
 {
-    private readonly DbContexto _contexto;
-    
-    public AdministradorServico(DbContexto contexto)
+    private const int ItensPorPagina = 10;
+
+    public async Task<Administrador?> Login(LoginDto loginDto)
     {
-        _contexto = contexto;
+        return await contexto.Administradores
+            .FirstOrDefaultAsync(a => a.Email == loginDto.Email && a.Senha == loginDto.Senha);
     }
 
-    public Administrador? Login(LoginDto loginDto)
+    public async Task<bool> Existe(string email)
     {
-        return _contexto.Administradores
-            .FirstOrDefault(a => a.Email == loginDto.Email && a.Senha == loginDto.Senha);
+        return await contexto.Administradores.AnyAsync(a => a.Email == email);
     }
 
-    public void Incluir(Administrador administrador)
+    public async Task Incluir(Administrador administrador)
     {
-        _contexto.Administradores.Add(administrador);
-        _contexto.SaveChanges();
+        contexto.Administradores.Add(administrador);
+        await contexto.SaveChangesAsync();
     }
 
-    public List<Administrador> Todos(int pagina = 1)
+    public async Task<List<Administrador>> Todos(int? pagina = 1)
     {
-        var query = _contexto.Administradores.AsQueryable();
+        if (pagina is null or <= 0)
+        {
+            pagina = 1;
+        }
 
-        var itensPorPagina = 10;
-
-        query = query.Skip((pagina - 1) * itensPorPagina).Take(itensPorPagina);
-
-        return query.ToList();
+        return await contexto.Administradores
+            .Skip((pagina.Value - 1) * ItensPorPagina)
+            .Take(ItensPorPagina)
+            .ToListAsync();
     }
 
-    public Administrador? BuscaPorId(int id)
+    public async Task<Administrador?> BuscaPorId(int id)
     {
-        return _contexto.Administradores.Find(id);
+        return await contexto.Administradores.FindAsync(id);
     }
 }

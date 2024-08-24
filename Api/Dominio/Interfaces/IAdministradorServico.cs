@@ -5,8 +5,9 @@ namespace MinimalApi.Dominio.Interfaces;
 
 public interface IAdministradorServico
 {
-    Administrador? Login(LoginDto loginDto);
-    void Incluir(Administrador administrador);
-    List<Administrador> Todos(int pagina = 1);
-    Administrador? BuscaPorId(int id);
+    Task<Administrador?> Login(LoginDto loginDto);
+    Task<bool> Existe(string email);
+    Task Incluir(Administrador administrador);
+    Task<List<Administrador>> Todos(int? pagina = 1);
+    Task<Administrador?> BuscaPorId(int id);
 }

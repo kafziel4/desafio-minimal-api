@@ -10,16 +10,6 @@ public class VeiculoServicoTest
 {
     private DbContexto _context = default!;
 
-    private DbContexto CriarContextoDeTeste()
-    {
-        var connectionString = Environment.GetEnvironmentVariable("CONNECTION_STRING")!;
-        var options = new DbContextOptionsBuilder<DbContexto>()
-            .UseMySql(connectionString, ServerVersion.AutoDetect(connectionString))
-            .Options;
-
-        return new DbContexto(options);
-    }
-
     [TestInitialize]
     public void Setup()
     {
@@ -28,29 +18,20 @@ public class VeiculoServicoTest
         _context.Database.ExecuteSqlRaw("TRUNCATE TABLE veiculos");
     }
 
-    [TestMethod]
-    public void TestandoSalvarVeiculo()
+    private DbContexto CriarContextoDeTeste()
     {
-        // Arrange
-        var veiculo = new Veiculo
-        {
-            Id = 1,
-            Nome = "Fiesta",
-            Marca = "Ford",
-            Ano = 2014,
-        };
+        var connectionString = Environment.GetEnvironmentVariable("CONNECTION_STRING");
+        ArgumentException.ThrowIfNullOrEmpty(connectionString);
 
-        var veiculoServico = new VeiculoServico(_context);
+        var options = new DbContextOptionsBuilder<DbContexto>()
+            .UseMySql(connectionString, ServerVersion.AutoDetect(connectionString))
+            .Options;
 
-        // Act
-        veiculoServico.Incluir(veiculo);
-
-        // Assert
-        Assert.AreEqual(1, veiculoServico.Todos().Count);
+        return new DbContexto(options);
     }
 
     [TestMethod]
-    public void TestandoBuscaPorId()
+    public async Task TestandoSalvarVeiculo()
     {
         // Arrange
         var veiculo = new Veiculo
@@ -62,17 +43,17 @@ public class VeiculoServicoTest
         };
 
         var veiculoServico = new VeiculoServico(_context);
-        veiculoServico.Incluir(veiculo);
 
         // Act
-        var veiculoDoBanco = veiculoServico.BuscaPorId(veiculo.Id)!;
+        await veiculoServico.Incluir(veiculo);
 
         // Assert
-        Assert.AreEqual(1, veiculoDoBanco.Id);
+        var veiculos = await veiculoServico.Todos();
+        Assert.AreEqual(1, veiculos.Count);
     }
 
     [TestMethod]
-    public void TestandoAtualizar()
+    public async Task TestandoBuscaPorId()
     {
         // Arrange
         var veiculo = new Veiculo
@@ -84,20 +65,17 @@ public class VeiculoServicoTest
         };
 
         var veiculoServico = new VeiculoServico(_context);
-        veiculoServico.Incluir(veiculo);
-        var veiculoDoBanco = veiculoServico.BuscaPorId(veiculo.Id)!;
-
-        veiculoDoBanco.Nome = "Fiesta Sedan";
+        await veiculoServico.Incluir(veiculo);
 
         // Act
-        veiculoServico.Atualizar(veiculoDoBanco);
+        var veiculoDoBanco = await veiculoServico.BuscaPorId(veiculo.Id);
 
         // Assert
-        Assert.AreEqual("Fiesta Sedan", veiculoServico.BuscaPorId(veiculo.Id)!.Nome);
+        Assert.AreEqual(1, veiculoDoBanco?.Id);
     }
 
     [TestMethod]
-    public void TestandoApagar()
+    public async Task TestandoAtualizar()
     {
         // Arrange
         var veiculo = new Veiculo
@@ -109,13 +87,40 @@ public class VeiculoServicoTest
         };
 
         var veiculoServico = new VeiculoServico(_context);
-        veiculoServico.Incluir(veiculo);
-        var veiculoDoBanco = veiculoServico.BuscaPorId(veiculo.Id)!;
+        await veiculoServico.Incluir(veiculo);
+        var veiculoDoBanco = await veiculoServico.BuscaPorId(veiculo.Id);
+
+        veiculoDoBanco!.Nome = "Fiesta Sedan";
 
         // Act
-        veiculoServico.Apagar(veiculoDoBanco);
+        await veiculoServico.Atualizar(veiculoDoBanco);
 
         // Assert
-        Assert.AreEqual(null, veiculoServico.BuscaPorId(veiculo.Id));
+        var veiculoAtualizado = await veiculoServico.BuscaPorId(veiculo.Id);
+        Assert.AreEqual("Fiesta Sedan", veiculoAtualizado?.Nome);
+    }
+
+    [TestMethod]
+    public async Task TestandoApagar()
+    {
+        // Arrange
+        var veiculo = new Veiculo
+        {
+            Id = 1,
+            Nome = "Fiesta",
+            Marca = "Ford",
+            Ano = 2014,
+        };
+
+        var veiculoServico = new VeiculoServico(_context);
+        await veiculoServico.Incluir(veiculo);
+        var veiculoDoBanco = await veiculoServico.BuscaPorId(veiculo.Id);
+
+        // Act
+        await veiculoServico.Apagar(veiculoDoBanco!);
+
+        // Assert
+        var veiculoApagado = await veiculoServico.BuscaPorId(veiculo.Id);
+        Assert.AreEqual(null, veiculoApagado);
     }
 }

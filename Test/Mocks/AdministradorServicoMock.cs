@@ -23,25 +23,32 @@ public class AdministradorServicoMock : IAdministradorServico
             Perfil = "Editor"
         }
     ];
-    
-    public Administrador? Login(LoginDto loginDto)
+
+    public Task<Administrador?> Login(LoginDto loginDto)
     {
-        return _administradores.Find(a => a.Email == loginDto.Email && a.Senha == loginDto.Senha);
+        return Task.FromResult(
+            _administradores.Find(a => a.Email == loginDto.Email && a.Senha == loginDto.Senha));
     }
 
-    public void Incluir(Administrador administrador)
+    public Task<bool> Existe(string email)
+    {
+        return Task.FromResult(_administradores.Exists(a => a.Email == email));
+    }
+
+    public Task Incluir(Administrador administrador)
     {
         administrador.Id = _administradores.Count + 1;
         _administradores.Add(administrador);
+        return Task.CompletedTask;
     }
 
-    public List<Administrador> Todos(int pagina = 1)
+    public Task<List<Administrador>> Todos(int? pagina = 1)
     {
-        return _administradores;
+        return Task.FromResult(_administradores);
     }
 
-    public Administrador? BuscaPorId(int id)
+    public Task<Administrador?> BuscaPorId(int id)
     {
-        return _administradores.Find(a => a.Id == id);
+        return Task.FromResult(_administradores.Find(a => a.Id == id));
     }
 }

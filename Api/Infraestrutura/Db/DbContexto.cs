@@ -15,6 +15,8 @@ public class DbContexto : DbContext
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        modelBuilder.Entity<Administrador>().HasIndex(a => a.Email).IsUnique();
+
         modelBuilder.Entity<Administrador>().HasData(
             new Administrador
             {
